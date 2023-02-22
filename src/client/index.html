@@ -11,7 +11,15 @@
 <body class="w-full h-full flex justify-center">
 
 
-  <p>Initial</p>
+  <div class="w-[64rem] min-w-[64rem] h-full">
+    <div>
+      <button id="sdk-btn" class="cus-btn">Upload Sudoku</button>
+      <input type='file' id="sdk-input" accept=".sdk" class="hidden">
+
+      <button id="sdkr-btn" class="cus-btn">Upload Rules</button>
+      <input type='file' id="sdkr-input" accept=".sdkr" class="hidden">
+    </div>
+  </div>
 
   <script type="module" src="main.ts"></script>
 </body>
