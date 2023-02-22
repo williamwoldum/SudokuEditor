@@ -1,5 +1,5 @@
 import { reportError } from './StatusHandler'
-import { parseSdk } from '../sdkParser'
+import { parseSdk } from './SudokuParser'
 import EditorHandler from './editorHandler'
 
 export function handleSdkClick(): void {
