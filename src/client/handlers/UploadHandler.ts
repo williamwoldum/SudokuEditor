@@ -1,6 +1,6 @@
 import { reportError } from './StatusHandler'
 import { parseSdk } from './SudokuParser'
-import EditorHandler from './editorHandler'
+import EditorHandler from './EditorHandler'
 
 export function handleSdkClick(): void {
   document.getElementById('sdk-input')?.click()
