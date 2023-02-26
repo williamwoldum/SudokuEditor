@@ -1,0 +1,100 @@
+# Helper rules
+###################################################################
+
+rule sumTo(a) expects *:
+    sum = 0
+    for i to len(cells):
+        sum += cells.val
+    if sum == a:
+        satisfied
+    else:
+        disatisfied
+
+rule between(a, b) expects 1: 
+    apply (a <= $cell and $cell >= b) to cell
+
+rule unique() expects 2: 
+    apply ($cells[1] != $cells[2]) to cells
+
+rule uniqueCollection() expects *:
+    for i from 1 to len(cells):
+        for j from i + 1 to len(cells):
+                apply unique() to [cells[i], cells[j]]
+
+rule differBy(a) expects 2:
+    apply (
+        $cells[1] == $cells[2] + a or
+        $cells[1] == $cells[2] - a
+    ) to cells
+
+rule differByMoreThan(a) expects 2:
+    apply (
+        $cells[1] >= $cells[2] + a or
+        $cells[1] >= $cells[2] - a
+    ) to cells
+
+rule relation(a) expects 2:
+    apply (
+        $cells[1] == a * $cells[2] or 
+        $cells[1] == $cells[2] / a    
+    )
+
+
+# Popular rules
+###################################################################
+
+rule normalSudoku() expects 0:
+    apply between(1, 9) to all sudoku.cells
+    apply uniqueCollection() to all sudoku.rows
+    apply uniqueCollection() to all sudoku.cols
+    apply uniqueCollection() to all sudoku.boxes
+
+rule whiteKropki() expects 2:
+    apply differBy(1) to cells
+
+rule blackKropki() expects 2:
+    apply relation(2) to cells
+
+rule even() expects 1:
+    apply ($cell % 2 == 0) to cell
+
+rule odd() expects 1:
+    apply ($cell % 2 == 1) to cell
+
+rule killerCage(sum) expects 2:
+    apply sumTo(sum) to cells
+
+rule arrow(_cell) expects 1:               
+    apply sumTo($_cell) to cell
+
+rule knigtsMove() expects 1:
+    for i from -2 to 2:
+        for j from -2 to 2:
+            if i*i + j*j == 5:
+                apply unique() to [cells[1], cells[1].getRelative(i, j)]
+
+rule kingsMove() expects 1:
+    for i from -1 to 1:
+        for j from -1 to 1:
+            if i != 0 or j != 0:
+                apply unique() to [cells[1], cells[1].getRelative(i, j)]
+
+rule germanWhisperLine() expects *:
+    for i from 2 to len(cells)
+        apply differByMoreThan(4) to [cells[i-1], cells[i]]
+
+rule thermometer() expects *:
+    for i from 1 to len(cells):
+        for j from i + 1 to len(cells):
+                apply ($cells[i] <= $cells[j]) to [cells[i], cells[j]]
+
+
+# Rule application
+###################################################################
+
+apply normalSudoku() to [] 
+
+apply uniqueCollection() to all [[(3,4), (4, 5)], [(6,7), (7, 8)]]
+
+apply whiteKropki() to [(8, 8), (9, 9)]
+

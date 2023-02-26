@@ -1,4 +1,4 @@
-import { reportError } from './StatusHandler'
+import { reportError, reportSuccess } from './StatusHandler'
 import { parseSdk } from './SudokuParser'
 import EditorHandler from './EditorHandler'
 
@@ -33,6 +33,29 @@ export function handleSdkrInput(e: Event): void {
   const file = (target.files as FileList)[0]
 
   const fr = new FileReader()
-  fr.onload = () => {} // Not implemented yet
+  fr.onload = async () => {
+    const sdkText = fr.result as string
+
+    try {
+      const response = await fetch('/api/get-constraints', {
+        method: 'POST',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'text/plain;charset=UTF-8'
+        },
+        body: sdkText
+      })
+
+      const data = await response.text()
+      reportSuccess(data)
+
+      // TODO
+      // Ready for implementation once backend is running properly
+      // const constraints: Constraint[] = data.constraints
+      // EditorHandler.setConstraints(constraints)
+    } catch (e) {
+      if (e instanceof Error) reportError(e.message)
+    }
+  } // Not implemented yet
   fr.readAsText(file)
 }

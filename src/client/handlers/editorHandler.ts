@@ -1,6 +1,6 @@
 import Sudoku from '../models/sudoku'
 import P5 from 'p5'
-import { ConstraintState } from '../models/Constraint'
+import { type Constraint, ConstraintState } from '../models/Constraint'
 
 class EditorHandler {
   private _sudoku: Sudoku
@@ -15,6 +15,11 @@ class EditorHandler {
   public setSudoku(sdk: Sudoku): void {
     this._sudoku = sdk
     this.updateInfoBoxes()
+    this._canvas.draw()
+  }
+
+  public setConstraints(constraints: Constraint[]): void {
+    this._sudoku.constraints = constraints
     this._canvas.draw()
   }
 
