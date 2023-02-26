@@ -1,5 +1,6 @@
 import Sudoku from '../models/sudoku'
 import P5 from 'p5'
+import { ConstraintState } from '../models/Constraint'
 
 class EditorHandler {
   private _sudoku: Sudoku
@@ -28,10 +29,41 @@ class EditorHandler {
     auth?.classList.remove('hidden')
   }
 
+  private updateConstraintBox(messages: string[]): void {
+    const cBox = document.getElementById('constraint-box')
+    cBox!.innerHTML = ''
+    messages.forEach((msg) => {
+      const p = document.createElement('p')
+      p.textContent = msg
+      cBox!.appendChild(p)
+    })
+  }
+
   private placeDigit(idx: number, digit: number): void {
     if (!this._sudoku.cells[idx].isLocked) {
       this._sudoku.cells[idx].value = digit
+
+      const messages = this.checkConstraints()
+      this.updateConstraintBox(messages)
     }
+  }
+
+  private checkConstraints(): string[] {
+    const messages: string[] = []
+
+    this._sudoku.cells.forEach((cell) => {
+      cell.isBroken = false
+    })
+
+    this._sudoku.constraints.forEach((constraint) => {
+      if (constraint.isOkay() === ConstraintState.Broken) {
+        constraint.cells.forEach((cell) => {
+          cell.isBroken = true
+        })
+        messages.push(constraint.message)
+      }
+    })
+    return messages
   }
 
   sketch = (p5: P5): void => {
@@ -67,6 +99,11 @@ class EditorHandler {
 
       this._sudoku.cells.forEach((cell) => {
         cell.isLocked ? p5.fill(50) : p5.fill(65, 105, 225)
+
+        if (cell.isBroken) {
+          p5.fill(255, 100, 100)
+        }
+
         if (cell.value > 0) {
           p5.text(
             cell.value,

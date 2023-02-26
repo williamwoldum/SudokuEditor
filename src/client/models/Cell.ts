@@ -1,9 +1,12 @@
 export default class Cell {
   value: number
   isLocked: boolean
+  isBroken: boolean = false
   row: number
   col: number
+  box: number
   idx: number
+  name: string
   neighbors: number[]
   orthogonal: number[]
 
@@ -12,7 +15,9 @@ export default class Cell {
     this.isLocked = isLocked
     this.row = row
     this.col = col
+    this.box = this.calcBoxIdx(row, col)
     this.idx = row * 9 + col
+    this.name = `R${row + 1}C${col + 1}`
     this.neighbors = this.getNeighbors(row, col)
     this.orthogonal = this.getOrthogonal(row, col)
   }
@@ -23,6 +28,13 @@ export default class Cell {
 
   public checkIfNeighbors(otherCell: Cell): boolean {
     return this.neighbors.includes(otherCell.idx)
+  }
+
+  private calcBoxIdx(row: number, col: number): number {
+    const bRow = Math.floor(row / 3)
+    const bCol = Math.floor(col / 3)
+    const bIdx = bRow * 3 + bCol
+    return bIdx
   }
 
   private getNeighbors(row: number, col: number): number[] {

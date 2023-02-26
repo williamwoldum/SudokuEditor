@@ -36,6 +36,7 @@ export function parseSdk(sdkText: string): Sudoku {
     source,
     level,
     url,
-    cells
+    cells,
+    []
   )
 }
