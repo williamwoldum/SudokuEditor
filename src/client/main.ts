@@ -13,6 +13,9 @@ const darkModeToggle = document.getElementById(
 darkModeToggle.addEventListener<'change'>('change', toggleDarkMode)
 darkModeToggle.checked = localStorage.theme === 'dark'
 
+document.getElementById('reset-btn')!.addEventListener<'click'>('click', () => {
+  EditorHandler.resetSudoku()
+})
 document
   .getElementById('sdk-btn')!
   .addEventListener<'click'>('click', handleSdkClick)

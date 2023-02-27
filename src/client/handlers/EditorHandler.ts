@@ -26,6 +26,14 @@ class EditorHandler {
     this._canvas.draw()
   }
 
+  public resetSudoku(): void {
+    this._sudoku.cells.forEach((cell) => {
+      if (!cell.isLocked) cell.value = 0
+    })
+    this.updateConstraintBox()
+    this._canvas.draw()
+  }
+
   public updateColorMode(): void {
     this._darkmodeEnabled = localStorage.theme === 'dark'
     this._canvas.draw()
