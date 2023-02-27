@@ -5,6 +5,13 @@ import {
   handleSdkInput,
   handleSdkrInput
 } from './handlers/UploadHandler'
+import EditorHandler from './handlers/EditorHandler'
+
+const darkModeToggle = document.getElementById(
+  'darkmode-toggle'
+) as HTMLInputElement
+darkModeToggle.addEventListener<'change'>('change', toggleDarkMode)
+darkModeToggle.checked = localStorage.theme === 'dark'
 
 document
   .getElementById('sdk-btn')!
@@ -18,3 +25,21 @@ document
 document
   .getElementById('sdkr-input')!
   .addEventListener<'change'>('change', handleSdkrInput)
+
+updateDarkMode()
+
+function toggleDarkMode(e: Event): void {
+  const toggle = e.target as HTMLInputElement
+  if (toggle.checked) localStorage.theme = 'dark'
+  else localStorage.theme = 'light'
+  updateDarkMode()
+  EditorHandler.updateColorMode()
+}
+
+function updateDarkMode(): void {
+  if (localStorage.theme === 'dark') {
+    document.documentElement.classList.add('dark')
+  } else {
+    document.documentElement.classList.remove('dark')
+  }
+}

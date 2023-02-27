@@ -5,9 +5,11 @@ import { type Constraint, ConstraintState } from '../models/Constraint'
 class EditorHandler {
   private _sudoku: Sudoku
   private readonly _canvas: P5
+  private _darkmodeEnabled: boolean = localStorage.theme === 'dark'
 
   constructor() {
     this._sudoku = Sudoku.GetEmptySudoku()
+    this.updateConstraintBox()
     // eslint-disable-next-line no-new
     this._canvas = new P5(this.sketch)
   }
@@ -15,11 +17,17 @@ class EditorHandler {
   public setSudoku(sdk: Sudoku): void {
     this._sudoku = sdk
     this.updateInfoBoxes()
+    this.updateConstraintBox()
     this._canvas.draw()
   }
 
   public setConstraints(constraints: Constraint[]): void {
     this._sudoku.constraints = constraints
+    this._canvas.draw()
+  }
+
+  public updateColorMode(): void {
+    this._darkmodeEnabled = localStorage.theme === 'dark'
     this._canvas.draw()
   }
 
@@ -34,12 +42,24 @@ class EditorHandler {
     auth?.classList.remove('hidden')
   }
 
-  private updateConstraintBox(messages: string[]): void {
+  private updateConstraintBox(): void {
+    const messages = this.checkConstraints()
     const cBox = document.getElementById('constraint-box')
-    cBox!.innerHTML = ''
+
+    if (messages.length > 0) {
+      cBox!.innerHTML = ''
+    } else {
+      cBox!.innerHTML = '<p class="italic text-gray-400">No rule breaks yet</p>'
+    }
+
     messages.forEach((msg) => {
+      msg = msg.replaceAll(
+        /R[1-9]C[1-9]/g,
+        '<span class="bg-gray-200 dark:bg-gray-600 rounded px-1 font-semibold">$&</span>'
+      )
       const p = document.createElement('p')
-      p.textContent = msg
+      p.classList.add('text-gray-600', 'dark:text-gray-400')
+      p.innerHTML = msg
       cBox!.appendChild(p)
     })
   }
@@ -47,9 +67,7 @@ class EditorHandler {
   private placeDigit(idx: number, digit: number): void {
     if (!this._sudoku.cells[idx].isLocked) {
       this._sudoku.cells[idx].value = digit
-
-      const messages = this.checkConstraints()
-      this.updateConstraintBox(messages)
+      this.updateConstraintBox()
     }
   }
 
@@ -73,6 +91,16 @@ class EditorHandler {
 
   sketch = (p5: P5): void => {
     const tileSize = 70
+    const blue300 = p5.color('#93c5fd')
+    const blue700 = p5.color('#1d4ed8')
+    const red300 = p5.color('#fca5a5')
+    const red700 = p5.color('#b91c1c')
+    const gray200 = p5.color('#e5e7eb')
+    const gray400 = p5.color('#9ca3af')
+    const gray500 = p5.color('#6b7280')
+    const gray600 = p5.color('#4b5563')
+    const gray700 = p5.color('#374151')
+    const gray800 = p5.color('#1f2937')
 
     p5.setup = () => {
       const canvas = p5.createCanvas(tileSize * 9 + 2, tileSize * 9 + 2)
@@ -83,14 +111,14 @@ class EditorHandler {
     }
 
     p5.draw = (): void => {
-      p5.background(255)
+      p5.background(this._darkmodeEnabled ? gray800 : p5.color(255))
       drawGrid()
       drawDigits()
       drawSelection()
     }
 
     const drawGrid = (): void => {
-      p5.stroke(180)
+      p5.stroke(this._darkmodeEnabled ? gray700 : gray200)
       for (let i = 0; i < 10; i++) {
         p5.strokeWeight(i % 3 === 0 ? 2 : 1)
         p5.line(i * tileSize + 1, 1, i * tileSize + 1, p5.height + 1)
@@ -103,10 +131,12 @@ class EditorHandler {
       p5.textSize(32)
 
       this._sudoku.cells.forEach((cell) => {
-        cell.isLocked ? p5.fill(50) : p5.fill(65, 105, 225)
-
-        if (cell.isBroken) {
-          p5.fill(255, 100, 100)
+        if (this._darkmodeEnabled) {
+          cell.isLocked ? p5.fill(gray400) : p5.fill(blue300)
+          if (cell.isBroken) p5.fill(red300)
+        } else {
+          cell.isLocked ? p5.fill(gray600) : p5.fill(blue700)
+          if (cell.isBroken) p5.fill(red700)
         }
 
         if (cell.value > 0) {
@@ -133,15 +163,17 @@ class EditorHandler {
         })
 
         const cell = this._sudoku.cells[selected]
-        p5.fill(65, 105, 225, 20)
+        gray400.setAlpha(5)
+        p5.fill(gray400)
         p5.square(cell.col * tileSize + 1, cell.row * tileSize + 1, tileSize)
+        gray400.setAlpha(255)
       })
 
       const strokeWeight = 2
 
       p5.strokeCap(p5.SQUARE)
       p5.strokeWeight(strokeWeight)
-      p5.stroke(65, 105, 225)
+      p5.stroke(this._darkmodeEnabled ? gray500 : gray400)
 
       edges.forEach((edge) => {
         const selected = this._sudoku.cells[edge[0]]

@@ -3,31 +3,44 @@
 
 <head>
   <meta charset="UTF-8" />
-  <!-- <link rel="icon" type="image/svg+xml" href="/vite.svg" /> -->
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Editor</title>
 </head>
 
-<body class="w-full h-full flex justify-center">
+<body class="w-full h-screen flex justify-center dark:bg-gray-800">
 
 
-  <div class="w-[64rem] min-w-[64rem] h-full">
+  <div class="w-[64rem] min-w-[64rem] h-full flex flex-col justify-center items-center">
 
-    <div>
-      <button id="sdk-btn" class="cus-btn">Upload Sudoku</button>
-      <input type='file' id="sdk-input" accept=".sdk" class="hidden">
+    <div class="space-y-8">
+      <div>
+        <button id="sdk-btn" class="cus-btn">Upload Sudoku</button>
+        <input type='file' id="sdk-input" accept=".sdk" class="hidden">
 
-      <button id="sdkr-btn" class="cus-btn">Upload Rules</button>
-      <input type='file' id="sdkr-input" accept=".sdkr" class="hidden">
+        <button id="sdkr-btn" class="cus-btn">Upload Rules</button>
+        <input type='file' id="sdkr-input" accept=".sdkr" class="hidden">
+
+        <label class="relative inline-flex items-center cursor-pointer float-right">
+          <input id="darkmode-toggle" type="checkbox" value="" class="sr-only peer" checked>
+          <div
+            class="w-11 h-6 bg-gray-200 outline-none peer dark:none peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[4px] after:left-[6px] after:bg-white dark:after:bg-gray-400 dark:after:border-gray-400  after:h-4 after:w-4 after:transition-all  peer-checked:bg-gray-200 dark:peer-checked:bg-gray-700">
+          </div>
+        </label>
+      </div>
+
+      <div>
+        <p id="sdk-description" class="hidden font-semibold text-gray-600 dark:text-gray-400"></p>
+        <p id="sdk-author" class="hidden italic font-thin text-gray-600 dark:text-gray-400"></p>
+      </div>
+
+      <div id="canvasContainer"></div>
+
+      <div id="constraint-box"
+        class="w-[632px] h-40 bg-gray-100 dark:bg-gray-700 overflow-y-scroll p-3 scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent">
+      </div>
+
     </div>
-
-    <p id="sdk-description" class="hidden"></p>
-    <p id="sdk-author" class="hidden"></p>
-
-    <div id="canvasContainer"></div>
-
-    <div id="constraint-box"></div>
-
   </div>
   <script type="module" src="main.ts"></script>
 </body>

@@ -3,6 +3,10 @@ import eslint from '@rollup/plugin-eslint'
 
 export default defineConfig({
   root: 'src/client',
+  publicDir: '../../public',
+  build: {
+    outDir: '../../dist'
+  },
   server: {
     open: 'index.html',
     proxy: {

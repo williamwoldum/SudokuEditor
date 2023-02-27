@@ -1,0 +1,14 @@
+<svg version="1.2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+	<title>Nyt Projekt</title>
+	<defs>
+		<image  width="32" height="32" id="img1" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgAQMAAABJtOi3AAAAAXNSR0IB2cksfwAAAANQTFRFAAAAp3o92gAAAAF0Uk5TAEDm2GYAAAAMSURBVHicY2AY3AAAAKAAAbAGYhgAAAAASUVORK5CYII="/>
+	</defs>
+	<style>
+		.s0 { fill: #4b5563 } 
+	</style>
+	<use id="Background" href="#img1" x="0" y="0"/>
+	<path id="Form 1" class="s0" d="m9 0h2v32h-2zm0 0h2v32h-2zm0 0h2v32h-2z"/>
+	<path id="Form 1 copy" class="s0" d="m0 11v-2h32v2zm0 0v-2h32v2zm0 0v-2h32v2z"/>
+	<path id="Form 1 copy 3" class="s0" d="m0 23v-2h32v2zm0 0v-2h32v2zm0 0v-2h32v2z"/>
+	<path id="Form 1 copy 2" class="s0" d="m21 0h2v32h-2zm0 0h2v32h-2zm0 0h2v32h-2z"/>
+</svg>
