@@ -4,6 +4,6 @@
 
 @layer base {
   .cus-btn {
-    @apply bg-gray-100 hover:bg-gray-200 dark:hover:bg-gray-600 dark:bg-gray-700 text-gray-600 dark:text-gray-400 font-bold py-2 px-4 inline-flex items-center;
+    @apply h-9 bg-gray-100 hover:bg-gray-200 dark:hover:bg-gray-600 dark:bg-gray-700 text-gray-500 dark:text-gray-400 font-bold py-2 px-4 inline-flex items-center text-xs;
   }
 }

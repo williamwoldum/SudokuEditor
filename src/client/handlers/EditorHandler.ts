@@ -57,16 +57,17 @@ class EditorHandler {
     if (messages.length > 0) {
       cBox!.innerHTML = ''
     } else {
-      cBox!.innerHTML = '<p class="italic text-gray-400">No rule breaks yet</p>'
+      cBox!.innerHTML =
+        '<p class="italic text-gray-400 text-xs">No rule breaks</p>'
     }
 
     messages.forEach((msg) => {
       msg = msg.replaceAll(
         /R[1-9]C[1-9]/g,
-        '<span class="bg-gray-200 dark:bg-gray-600 rounded px-1 font-semibold">$&</span>'
+        '<span class="bg-gray-200 dark:bg-gray-600 px-1 font-semibold text-xs">$&</span>'
       )
       const p = document.createElement('p')
-      p.classList.add('text-gray-600', 'dark:text-gray-400')
+      p.classList.add('text-gray-500', 'dark:text-gray-400', 'text-xs')
       p.innerHTML = msg
       cBox!.appendChild(p)
     })
@@ -98,7 +99,7 @@ class EditorHandler {
   }
 
   sketch = (p5: P5): void => {
-    const tileSize = 70
+    const tileSize = 46
     const blue300 = p5.color('#93c5fd')
     const blue700 = p5.color('#1d4ed8')
     const red300 = p5.color('#fca5a5')
@@ -136,7 +137,7 @@ class EditorHandler {
 
     const drawDigits = (): void => {
       p5.noStroke()
-      p5.textSize(32)
+      p5.textSize(20)
 
       this._sudoku.cells.forEach((cell) => {
         if (this._darkmodeEnabled) {
