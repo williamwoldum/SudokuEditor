@@ -1,36 +1,32 @@
 import Sudoku from '../models/sudoku'
 import P5 from 'p5'
-import { type Constraint, ConstraintState } from '../models/Constraint'
+import { SudokuHandler } from '../models/SudokuHandler'
 
 class EditorHandler {
+  private _sudokuHandler: SudokuHandler
   private _sudoku: Sudoku
   private readonly _canvas: P5
   private _darkmodeEnabled: boolean = localStorage.theme === 'dark'
 
   constructor() {
-    this._sudoku = Sudoku.GetEmptySudoku()
-    this.updateConstraintBox()
+    this._sudokuHandler = SudokuHandler.getEmptySudokuHandler()
+    this._sudoku = Sudoku.set(this._sudokuHandler.getSudoku())
+    this.checkConstraints()
     // eslint-disable-next-line no-new
     this._canvas = new P5(this.sketch)
   }
 
-  public setSudoku(sdk: Sudoku): void {
-    this._sudoku = sdk
+  public setSudokuHandler(sudokuHandler: SudokuHandler): void {
+    this._sudokuHandler = sudokuHandler
+    this._sudoku = Sudoku.set(this._sudokuHandler.getSudoku())
     this.updateInfoBoxes()
-    this.updateConstraintBox()
-    this._canvas.draw()
-  }
-
-  public setConstraints(constraints: Constraint[]): void {
-    this._sudoku.constraints = constraints
+    this.checkConstraints()
     this._canvas.draw()
   }
 
   public resetSudoku(): void {
-    this._sudoku.cells.forEach((cell) => {
-      if (!cell.isLocked) cell.value = 0
-    })
-    this.updateConstraintBox()
+    this._sudoku.reset()
+    this.checkConstraints()
     this._canvas.draw()
   }
 
@@ -43,59 +39,52 @@ class EditorHandler {
     const desc = document.getElementById('sdk-description')
     const auth = document.getElementById('sdk-author')
 
-    desc!.textContent = this._sudoku.description
-    auth!.textContent = this._sudoku.author
+    desc!.textContent = this._sudokuHandler.getDescription()
+    auth!.textContent = this._sudokuHandler.getAuthor()
 
     desc?.classList.remove('hidden')
     auth?.classList.remove('hidden')
   }
 
-  private updateConstraintBox(): void {
-    const messages = this.checkConstraints()
-    const cBox = document.getElementById('constraint-box')
-
-    if (messages.length > 0) {
-      cBox!.innerHTML = ''
-    } else {
-      cBox!.innerHTML =
-        '<p class="italic text-gray-400 text-xs">No rule breaks</p>'
-    }
-
-    messages.forEach((msg) => {
-      msg = msg.replaceAll(
-        /R[1-9]C[1-9]/g,
-        '<span class="bg-gray-200 dark:bg-gray-600 px-1 font-semibold text-xs">$&</span>'
-      )
-      const p = document.createElement('p')
-      p.classList.add('text-gray-500', 'dark:text-gray-400', 'text-xs')
-      p.innerHTML = msg
-      cBox!.appendChild(p)
-    })
+  private updateConstraintBox(messages: string[]): void {
+    // const messages = this.checkConstraints()
+    // const cBox = document.getElementById('constraint-box')
+    // if (messages.length > 0) {
+    //   cBox!.innerHTML = ''
+    // } else {
+    //   cBox!.innerHTML =
+    //     '<p class="italic text-gray-400 text-xs">No rule breaks</p>'
+    // }
+    // messages.forEach((msg) => {
+    //   msg = msg.replaceAll(
+    //     /R[1-9]C[1-9]/g,
+    //     '<span class="bg-gray-200 dark:bg-gray-600 px-1 font-semibold text-xs">$&</span>'
+    //   )
+    //   const p = document.createElement('p')
+    //   p.classList.add('text-gray-500', 'dark:text-gray-400', 'text-xs')
+    //   p.innerHTML = msg
+    //   cBox!.appendChild(p)
+    // })
   }
 
   private placeDigit(idx: number, digit: number): void {
     if (!this._sudoku.cells[idx].isLocked) {
       this._sudoku.cells[idx].value = digit
-      this.updateConstraintBox()
+      this.checkConstraints()
     }
   }
 
-  private checkConstraints(): string[] {
+  private checkConstraints(): void {
     const messages: string[] = []
 
     this._sudoku.cells.forEach((cell) => {
       cell.isBroken = false
     })
 
-    this._sudoku.constraints.forEach((constraint) => {
-      if (constraint.isOkay() === ConstraintState.Broken) {
-        constraint.cells.forEach((cell) => {
-          cell.isBroken = true
-        })
-        messages.push(constraint.message)
-      }
-    })
-    return messages
+    // eslint-disable-next-line no-console
+    console.log(this._sudokuHandler.validate(this._sudoku.getNumGrid()))
+
+    this.updateConstraintBox(messages)
   }
 
   sketch = (p5: P5): void => {

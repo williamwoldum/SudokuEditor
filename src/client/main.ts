@@ -1,33 +1,22 @@
 import './style.css'
-import {
-  handleSdkClick,
-  handleSdkrClick,
-  handleSdkInput,
-  handleSdkrInput
-} from './handlers/UploadHandler'
+import { handleSdkrUpload, handleUploadClick } from './handlers/UploadHandler'
 import EditorHandler from './handlers/EditorHandler'
 
 const darkModeToggle = document.getElementById(
   'darkmode-toggle'
 ) as HTMLInputElement
-darkModeToggle.addEventListener<'change'>('change', toggleDarkMode)
+darkModeToggle.addEventListener('change', toggleDarkMode)
 darkModeToggle.checked = localStorage.theme === 'dark'
 
-document.getElementById('reset-btn')!.addEventListener<'click'>('click', () => {
+document.getElementById('reset-btn')!.addEventListener('click', () => {
   EditorHandler.resetSudoku()
 })
 document
-  .getElementById('sdk-btn')!
-  .addEventListener<'click'>('click', handleSdkClick)
+  .getElementById('upload-btn')!
+  .addEventListener('click', handleUploadClick)
 document
-  .getElementById('sdkr-btn')!
-  .addEventListener<'click'>('click', handleSdkrClick)
-document
-  .getElementById('sdk-input')!
-  .addEventListener<'change'>('change', handleSdkInput)
-document
-  .getElementById('sdkr-input')!
-  .addEventListener<'change'>('change', handleSdkrInput)
+  .getElementById('upload-input')!
+  .addEventListener('change', handleSdkrUpload)
 
 updateDarkMode()
 
