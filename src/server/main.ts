@@ -1,25 +1,47 @@
 import express from 'express'
 import ViteExpress from 'vite-express'
-import fs from 'fs'
-import path from 'path'
+import multer from 'multer'
+import { execSync } from 'child_process'
+import { randomBytes } from 'crypto'
+import dotenv from 'dotenv'
+
+dotenv.config()
 
 const app = express()
-const port = 8080
+const port = parseInt(process.env.PORT ?? '8080')
+const compilerPath =
+  process.env.COMPILER_PATH ?? 'src/server/resources/SdkrCompiler.jar'
+const outputPath = process.env.OUTPUT_PATH ?? 'public/Sudoku'
 
-app.use(express.text())
+const storage = multer.diskStorage({
+  destination: function (_req, _file, cb) {
+    cb(null, 'src/server/uploads/')
+  },
+  filename: function (_req, file, cb) {
+    cb(null, file.originalname)
+  }
+})
 
-app.post('/get-sudoku-handler', (_, res) => {
-  // Run sdkr validator
-  // Run sdkr compiler
-  // Respond with proper compilation output
+const upload = multer({ storage })
 
-  fs.readFile(path.join(__dirname, '/resources/sampleSdkr.js'), (err, data) => {
-    if (err != null) {
-      res.status(500).send('Error reading file')
+app.post('/upload-sudoku', upload.single('file'), (req, res) => {
+  const { file } = req
+
+  if (file === undefined) {
+    return res.status(500).send('Server Error')
+  }
+
+  try {
+    const id = randomBytes(3).toString('hex')
+    execSync(`${compilerPath} -i ${file.path} -o ${outputPath}/${id}.js"`)
+    return res.status(200).send(id)
+  } catch (error) {
+    if (error instanceof Error) {
+      // eslint-disable-next-line no-console
+      console.log(`Error: ${error.message}`)
     }
-    res.type('application/javascript')
-    res.send(data)
-  })
+    return res.status(500).send('Server error')
+  }
 })
 
 ViteExpress.listen(app, port, () => {

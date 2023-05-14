@@ -35,3 +35,13 @@ function updateDarkMode(): void {
     document.documentElement.classList.remove('dark')
   }
 }
+
+const params = new URL(window.location.toString()).searchParams
+const id = params.get('id') ?? '000000'
+
+const sudocodeScript = document.createElement('script')
+sudocodeScript.setAttribute('src', `/Sudoku/${id}.js`)
+sudocodeScript.onload = () => {
+  EditorHandler.updateSudokuHandler()
+}
+document.head.appendChild(sudocodeScript)

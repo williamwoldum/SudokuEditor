@@ -1,4 +1,4 @@
-export default class Cell {
+export default class DisplayCell {
   value: number
   isLocked: boolean
   isBroken: boolean = false
@@ -22,11 +22,11 @@ export default class Cell {
     this.orthogonal = this.getOrthogonal(row, col)
   }
 
-  public checkIfOrthogonal(otherCell: Cell): boolean {
+  public checkIfOrthogonal(otherCell: DisplayCell): boolean {
     return this.orthogonal.includes(otherCell.idx)
   }
 
-  public checkIfNeighbors(otherCell: Cell): boolean {
+  public checkIfNeighbors(otherCell: DisplayCell): boolean {
     return this.neighbors.includes(otherCell.idx)
   }
 

@@ -16,7 +16,7 @@
     <div class="space-y-8">
       <div>
         <button id="upload-btn" class="cus-btn">Upload Sudoku</button>
-        <input type='file' id="upload-input" accept=".sdkr" class="hidden">
+        <input type='file' id="upload-input" accept=".sudocode" class="hidden">
 
         <div class="float-right flex flex-col">
           <label class="relative inline-flex items-center cursor-pointer">
@@ -39,7 +39,7 @@
       <div id="canvasContainer"></div>
 
       <div id="constraint-box"
-        class="w-full h-28 bg-gray-100 dark:bg-gray-700 overflow-y-scroll p-2 space-y-1 scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent">
+        class="w-full max-w-[416px] h-28 bg-gray-100 dark:bg-gray-700 overflow-auto p-2 space-y-1 scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent">
       </div>
 
     </div>
