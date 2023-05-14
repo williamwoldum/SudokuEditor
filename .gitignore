@@ -22,3 +22,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Generated files
+public/Sudoku/*.js
+!public/Sudoku/000000.js

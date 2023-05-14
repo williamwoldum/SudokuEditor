@@ -1,24 +1,19 @@
-import Sudoku from '../models/sudoku'
+import DisplaySudoku from '../models/DisplaySudoku'
 import P5 from 'p5'
-import { SudokuHandler } from '../models/SudokuHandler'
 
 class EditorHandler {
-  private _sudokuHandler: SudokuHandler
-  private _sudoku: Sudoku
+  private _sudokuHandler!: Sudoku
+  private _sudoku!: DisplaySudoku
   private readonly _canvas: P5
   private _darkmodeEnabled: boolean = localStorage.theme === 'dark'
 
   constructor() {
-    this._sudokuHandler = SudokuHandler.getEmptySudokuHandler()
-    this._sudoku = Sudoku.set(this._sudokuHandler.getSudoku())
-    this.checkConstraints()
-    // eslint-disable-next-line no-new
     this._canvas = new P5(this.sketch)
   }
 
-  public setSudokuHandler(sudokuHandler: SudokuHandler): void {
-    this._sudokuHandler = sudokuHandler
-    this._sudoku = Sudoku.set(this._sudokuHandler.getSudoku())
+  public updateSudokuHandler(): void {
+    this._sudokuHandler = new Sudoku()
+    this._sudoku = DisplaySudoku.getEmpty()
     this.updateInfoBoxes()
     this.checkConstraints()
     this._canvas.draw()
@@ -39,32 +34,53 @@ class EditorHandler {
     const desc = document.getElementById('sdk-description')
     const auth = document.getElementById('sdk-author')
 
-    desc!.textContent = this._sudokuHandler.getDescription()
-    auth!.textContent = this._sudokuHandler.getAuthor()
+    desc!.textContent = 'Title'
+    auth!.textContent = 'Author'
 
     desc?.classList.remove('hidden')
     auth?.classList.remove('hidden')
   }
 
-  private updateConstraintBox(messages: string[]): void {
-    // const messages = this.checkConstraints()
-    // const cBox = document.getElementById('constraint-box')
-    // if (messages.length > 0) {
-    //   cBox!.innerHTML = ''
-    // } else {
-    //   cBox!.innerHTML =
-    //     '<p class="italic text-gray-400 text-xs">No rule breaks</p>'
-    // }
-    // messages.forEach((msg) => {
-    //   msg = msg.replaceAll(
-    //     /R[1-9]C[1-9]/g,
-    //     '<span class="bg-gray-200 dark:bg-gray-600 px-1 font-semibold text-xs">$&</span>'
-    //   )
-    //   const p = document.createElement('p')
-    //   p.classList.add('text-gray-500', 'dark:text-gray-400', 'text-xs')
-    //   p.innerHTML = msg
-    //   cBox!.appendChild(p)
-    // })
+  private updateConstraintBox(namedAssertions: NamedAssertion[]): void {
+    const cBox = document.getElementById('constraint-box')
+
+    if (namedAssertions.length > 0) {
+      cBox!.innerHTML = ''
+    } else {
+      cBox!.innerHTML =
+        '<p class="italic text-gray-400 text-xs">No rule breaks</p>'
+    }
+    namedAssertions.forEach((namedAssertion) => {
+      let formattedMessage =
+        `<span class="bg-gray-200 dark:bg-gray-600 px-1 font-semibold text-xs">${namedAssertion.name.slice(
+          1
+        )}:</span> ` + namedAssertion.assertion.message
+
+      namedAssertion.assertion.cells.forEach((cell) => {
+        // eslint-disable-next-line @typescript-eslint/no-base-to-string
+        formattedMessage += ` <span class="bg-gray-200 dark:bg-gray-600 px-1 font-semibold text-xs">${cell.toString()}</span>`
+      })
+      formattedMessage += '&nbsp;&nbsp;'
+
+      const p = document.createElement('p')
+      p.classList.add(
+        'text-gray-500',
+        'dark:text-gray-400',
+        'text-xs',
+        'whitespace-nowrap',
+        'hover:cursor-pointer'
+      )
+      p.innerHTML = formattedMessage
+
+      p.onclick = () => {
+        this._sudoku.selected = []
+        this._sudoku.selected = namedAssertion.assertion.cells.map(
+          (cell) => (cell.row - 1) * 9 + (cell.col - 1)
+        )
+        this._canvas.draw()
+      }
+      cBox!.appendChild(p)
+    })
   }
 
   private placeDigit(idx: number, digit: number): void {
@@ -75,16 +91,38 @@ class EditorHandler {
   }
 
   private checkConstraints(): void {
-    const messages: string[] = []
-
     this._sudoku.cells.forEach((cell) => {
       cell.isBroken = false
     })
 
-    // eslint-disable-next-line no-console
-    console.log(this._sudokuHandler.validate(this._sudoku.getNumGrid()))
+    const assertions = this._sudokuHandler.checkAllConstraints(
+      this._sudoku.getNums()
+    )
+    const failedAssertions = this.formatAssertions(assertions)
 
-    this.updateConstraintBox(messages)
+    for (const namedAssertion of failedAssertions) {
+      for (const cell of namedAssertion.assertion.cells) {
+        const idx = (cell.row - 1) * 9 + (cell.col - 1)
+        this._sudoku.cells[idx].isBroken = true
+      }
+    }
+
+    this.updateConstraintBox(failedAssertions)
+  }
+
+  private formatAssertions(
+    constraintsAssertions: Record<string, Assertion[]>
+  ): NamedAssertion[] {
+    const formattedConstraints: NamedAssertion[] = []
+    for (const name of Object.keys(constraintsAssertions)) {
+      for (const assertion of constraintsAssertions[name]) {
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-boolean-literal-compare
+        if (assertion.passed === false) {
+          formattedConstraints.push({ name, assertion })
+        }
+      }
+    }
+    return formattedConstraints
   }
 
   sketch = (p5: P5): void => {
@@ -312,6 +350,10 @@ class EditorHandler {
       p5.mouseY >= 0 &&
       p5.mouseY <= p5.height - 4
   }
+}
+interface NamedAssertion {
+  name: string
+  assertion: Assertion
 }
 
 export default new EditorHandler()
