@@ -15,11 +15,11 @@
 
     <div class="space-y-8">
       <div>
-        <button id="sdk-btn" class="cus-btn">Upload Sudoku</button>
-        <input type='file' id="sdk-input" accept=".sdk" class="hidden">
+        <button id="upload-sudocode-btn" class="cus-btn">Upload Sudoku</button>
+        <input type='file' id="upload-sudocode-input" accept=".sudocode" class="hidden">
 
-        <button id="sdkr-btn" class="cus-btn">Upload Rules</button>
-        <input type='file' id="sdkr-input" accept=".sdkr" class="hidden">
+        <button id="upload-overlay-btn" class="cus-btn">Upload Overlay</button>
+        <input type='file' id="upload-overlay-input" accept=".png" class="hidden">
 
         <div class="float-right flex flex-col">
           <label class="relative inline-flex items-center cursor-pointer">
@@ -34,15 +34,14 @@
         </div>
       </div>
 
-      <div>
-        <p id="sdk-description" class="hidden font-semibold text-gray-600 text-xs dark:text-gray-400"></p>
-        <p id="sdk-author" class="hidden italic font-thin text-gray-600 text-xs dark:text-gray-400"></p>
+      <div class="w-full max-w-[362px] max-h-24 overflow-auto space-y-1 scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent">
+        <p id="sdk-explanation" class="text-gray-600 text-xs dark:text-gray-400 space-y-2"></p>
       </div>
 
       <div id="canvasContainer"></div>
 
       <div id="constraint-box"
-        class="w-full h-28 bg-gray-100 dark:bg-gray-700 overflow-y-scroll p-2 space-y-1 scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent">
+        class="w-full max-w-[362px] h-28 bg-gray-100 dark:bg-gray-700 overflow-auto p-2 space-y-1 scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent">
       </div>
 
     </div>

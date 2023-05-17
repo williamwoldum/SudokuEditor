@@ -3,10 +3,7 @@
     "target": "ESNext",
     "useDefineForClassFields": true,
     "module": "CommonJS",
-    "lib": [
-      "ESNext",
-      "DOM"
-    ],
+    "lib": ["ESNext", "DOM"],
     "moduleResolution": "Node",
     "strict": true,
     "resolveJsonModule": true,
@@ -18,8 +15,5 @@
     "noImplicitReturns": true,
     "skipLibCheck": true
   },
-  "include": [
-    "src",
-    "vite.config.ts"
-  ]
+  "include": ["src", "vite.config.ts"]
 }

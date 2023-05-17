@@ -1,33 +1,29 @@
 import './style.css'
 import {
-  handleSdkClick,
-  handleSdkrClick,
-  handleSdkInput,
-  handleSdkrInput
+  handleSudocodeUpload,
+  handleSudocodeUploadClick,
+  handleOverlayUploadClick
 } from './handlers/UploadHandler'
 import EditorHandler from './handlers/EditorHandler'
 
 const darkModeToggle = document.getElementById(
   'darkmode-toggle'
 ) as HTMLInputElement
-darkModeToggle.addEventListener<'change'>('change', toggleDarkMode)
+darkModeToggle.addEventListener('change', toggleDarkMode)
 darkModeToggle.checked = localStorage.theme === 'dark'
 
-document.getElementById('reset-btn')!.addEventListener<'click'>('click', () => {
+document.getElementById('reset-btn')!.addEventListener('click', () => {
   EditorHandler.resetSudoku()
 })
 document
-  .getElementById('sdk-btn')!
-  .addEventListener<'click'>('click', handleSdkClick)
+  .getElementById('upload-sudocode-btn')!
+  .addEventListener('click', handleSudocodeUploadClick)
 document
-  .getElementById('sdkr-btn')!
-  .addEventListener<'click'>('click', handleSdkrClick)
+  .getElementById('upload-sudocode-input')!
+  .addEventListener('change', handleSudocodeUpload)
 document
-  .getElementById('sdk-input')!
-  .addEventListener<'change'>('change', handleSdkInput)
-document
-  .getElementById('sdkr-input')!
-  .addEventListener<'change'>('change', handleSdkrInput)
+  .getElementById('upload-overlay-btn')!
+  .addEventListener('click', handleOverlayUploadClick)
 
 updateDarkMode()
 
@@ -46,3 +42,13 @@ function updateDarkMode(): void {
     document.documentElement.classList.remove('dark')
   }
 }
+
+const params = new URL(window.location.toString()).searchParams
+const id = params.get('id') ?? '000000'
+
+const sudocodeScript = document.createElement('script')
+sudocodeScript.setAttribute('src', `/Sudoku/${id}.js`)
+sudocodeScript.onload = () => {
+  EditorHandler.updateSudokuHandler()
+}
+document.head.appendChild(sudocodeScript)

@@ -1,36 +1,27 @@
-import Sudoku from '../models/sudoku'
+import DisplaySudoku from '../models/DisplaySudoku'
 import P5 from 'p5'
-import { type Constraint, ConstraintState } from '../models/Constraint'
 
 class EditorHandler {
-  private _sudoku: Sudoku
+  private _sudokuHandler!: Sudoku
+  private _sudoku!: DisplaySudoku
   private readonly _canvas: P5
   private _darkmodeEnabled: boolean = localStorage.theme === 'dark'
 
   constructor() {
-    this._sudoku = Sudoku.GetEmptySudoku()
-    this.updateConstraintBox()
-    // eslint-disable-next-line no-new
     this._canvas = new P5(this.sketch)
   }
 
-  public setSudoku(sdk: Sudoku): void {
-    this._sudoku = sdk
+  public updateSudokuHandler(): void {
+    this._sudokuHandler = new Sudoku()
+    this._sudoku = DisplaySudoku.getEmpty()
     this.updateInfoBoxes()
-    this.updateConstraintBox()
-    this._canvas.draw()
-  }
-
-  public setConstraints(constraints: Constraint[]): void {
-    this._sudoku.constraints = constraints
+    this.checkConstraints()
     this._canvas.draw()
   }
 
   public resetSudoku(): void {
-    this._sudoku.cells.forEach((cell) => {
-      if (!cell.isLocked) cell.value = 0
-    })
-    this.updateConstraintBox()
+    this._sudoku.reset()
+    this.checkConstraints()
     this._canvas.draw()
   }
 
@@ -40,66 +31,192 @@ class EditorHandler {
   }
 
   private updateInfoBoxes(): void {
-    const desc = document.getElementById('sdk-description')
-    const auth = document.getElementById('sdk-author')
+    const expsElem = document.getElementById('sdk-explanation')
+    const exps = this._sudokuHandler.getExplanations()
 
-    desc!.textContent = this._sudoku.description
-    auth!.textContent = this._sudoku.author
+    for (const constraint of Object.keys(exps)) {
+      const pElem = document.createElement('p')
+      const nameElem = document.createElement('span')
+      const expElem = document.createElement('p')
 
-    desc?.classList.remove('hidden')
-    auth?.classList.remove('hidden')
+      nameElem.textContent = `${constraint.slice(1)}: `
+      nameElem.classList.add(
+        'bg-gray-100',
+        'dark:bg-gray-700',
+        'px-1',
+        'font-semibold',
+        'text-xs'
+      )
+
+      pElem.appendChild(nameElem)
+      expElem.textContent = exps[constraint]
+      pElem.appendChild(expElem)
+      expsElem!.appendChild(pElem)
+    }
   }
 
-  private updateConstraintBox(): void {
-    const messages = this.checkConstraints()
+  private updateConstraintBox(
+    namedAssertions: NamedAssertion[],
+    namedErrors: NamedError[]
+  ): void {
     const cBox = document.getElementById('constraint-box')
 
-    if (messages.length > 0) {
-      cBox!.innerHTML = ''
-    } else {
-      cBox!.innerHTML =
-        '<p class="italic text-gray-400 text-xs">No rule breaks</p>'
+    cBox!.innerHTML = ''
+
+    if (namedErrors.length > 0) {
+      namedErrors.forEach((nemedError) => {
+        const errorElem = document.createElement('p')
+        errorElem.classList.add(
+          'text-gray-500',
+          'dark:text-gray-400',
+          'text-xs',
+          'whitespace-nowrap',
+          'space-x-2',
+          'flex'
+        )
+
+        const badgeElem = document.createElement('span')
+        badgeElem.textContent = `${nemedError.name.slice(1)}`
+        badgeElem.classList.add(
+          'bg-gray-200',
+          'dark:bg-gray-600',
+          'px-1',
+          'font-semibold',
+          'hover:cursor-pointer',
+          'text-xs',
+          'text-red-500'
+        )
+        errorElem.appendChild(badgeElem)
+
+        const msgElem = document.createElement('p')
+        msgElem.textContent = nemedError.error
+        errorElem.appendChild(msgElem)
+        cBox!.appendChild(errorElem)
+      })
+      return
     }
 
-    messages.forEach((msg) => {
-      msg = msg.replaceAll(
-        /R[1-9]C[1-9]/g,
-        '<span class="bg-gray-200 dark:bg-gray-600 px-1 font-semibold text-xs">$&</span>'
+    if (namedAssertions.length === 0) {
+      const noRulesElem = document.createElement('p')
+      noRulesElem.classList.add('italic', 'text-gray-400', 'text-xs')
+      noRulesElem.textContent = 'No rule breaks'
+      cBox!.appendChild(noRulesElem)
+      return
+    }
+
+    namedAssertions.forEach((namedAssertion) => {
+      const ruleElem = document.createElement('p')
+      ruleElem.classList.add(
+        'text-gray-500',
+        'dark:text-gray-400',
+        'text-xs',
+        'whitespace-nowrap',
+        'space-x-2',
+        'flex'
       )
-      const p = document.createElement('p')
-      p.classList.add('text-gray-500', 'dark:text-gray-400', 'text-xs')
-      p.innerHTML = msg
-      cBox!.appendChild(p)
+
+      const badgeElem = document.createElement('span')
+      badgeElem.textContent = `${namedAssertion.name.slice(1)}`
+      badgeElem.classList.add(
+        'bg-gray-200',
+        'dark:bg-gray-600',
+        'px-1',
+        'font-semibold',
+        'hover:cursor-pointer',
+        'text-xs'
+      )
+      badgeElem.onclick = () => {
+        this._sudoku.selected = []
+        this._sudoku.selected = namedAssertion.assertion.cells.map(
+          (cell) => (cell.row - 1) * 9 + (cell.col - 1)
+        )
+        this._canvas.draw()
+      }
+      ruleElem.appendChild(badgeElem)
+
+      const msgElem = document.createElement('p')
+      msgElem.textContent = namedAssertion.assertion.message
+      ruleElem.appendChild(msgElem)
+
+      namedAssertion.assertion.cells.forEach((cell) => {
+        const cellElem = document.createElement('span')
+        // eslint-disable-next-line @typescript-eslint/no-base-to-string
+        cellElem.textContent = cell.toString()
+        cellElem.classList.add(
+          'bg-gray-200',
+          'dark:bg-gray-600',
+          'px-1',
+          'font-semibold',
+          'text-xs',
+          'hover:cursor-pointer',
+          'z-30'
+        )
+        cellElem.onclick = () => {
+          this._sudoku.selected = []
+          this._sudoku.selected = [(cell.row - 1) * 9 + (cell.col - 1)]
+          this._canvas.draw()
+        }
+        ruleElem.appendChild(cellElem)
+      })
+      cBox!.appendChild(ruleElem)
     })
   }
 
   private placeDigit(idx: number, digit: number): void {
     if (!this._sudoku.cells[idx].isLocked) {
       this._sudoku.cells[idx].value = digit
-      this.updateConstraintBox()
+      this.checkConstraints()
     }
   }
 
-  private checkConstraints(): string[] {
-    const messages: string[] = []
-
+  private checkConstraints(): void {
     this._sudoku.cells.forEach((cell) => {
       cell.isBroken = false
     })
 
-    this._sudoku.constraints.forEach((constraint) => {
-      if (constraint.isOkay() === ConstraintState.Broken) {
-        constraint.cells.forEach((cell) => {
-          cell.isBroken = true
-        })
-        messages.push(constraint.message)
+    const constraintResults = this._sudokuHandler.checkAllConstraints(
+      this._sudoku.getNums()
+    )
+    const failedAssertions = this.formatAssertions(constraintResults)
+    const failedErrors = this.formatErrors(constraintResults)
+
+    for (const namedAssertion of failedAssertions) {
+      for (const cell of namedAssertion.assertion.cells) {
+        const idx = (cell.row - 1) * 9 + (cell.col - 1)
+        this._sudoku.cells[idx].isBroken = true
       }
-    })
-    return messages
+    }
+
+    this.updateConstraintBox(failedAssertions, failedErrors)
+  }
+
+  private formatAssertions(
+    constraintsAssertions: constraintsResult
+  ): NamedAssertion[] {
+    const formattedConstraints: NamedAssertion[] = []
+    for (const name of Object.keys(constraintsAssertions)) {
+      for (const assertion of constraintsAssertions[name].results) {
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-boolean-literal-compare
+        if (assertion.passed === false) {
+          formattedConstraints.push({ name, assertion })
+        }
+      }
+    }
+    return formattedConstraints
+  }
+
+  private formatErrors(constraintsAssertions: constraintsResult): NamedError[] {
+    const formattedErrors: NamedError[] = []
+    for (const name of Object.keys(constraintsAssertions)) {
+      for (const error of constraintsAssertions[name].errors) {
+        formattedErrors.push({ name, error })
+      }
+    }
+    return formattedErrors
   }
 
   sketch = (p5: P5): void => {
-    const tileSize = 46
+    const tileSize = 40
     const blue300 = p5.color('#93c5fd')
     const blue700 = p5.color('#1d4ed8')
     const red300 = p5.color('#fca5a5')
@@ -111,25 +228,74 @@ class EditorHandler {
     const gray700 = p5.color('#374151')
     const gray800 = p5.color('#1f2937')
 
+    let overlayImg: P5.Image
+
     p5.setup = () => {
       const canvas = p5.createCanvas(tileSize * 9 + 2, tileSize * 9 + 2)
       canvas.parent('canvasContainer')
       p5.cursor('pointer')
       p5.textAlign(p5.CENTER, p5.CENTER)
       p5.noLoop()
+
+      const input = document.getElementById('upload-overlay-input')
+      input!.addEventListener('change', setOverlay, false)
     }
 
     p5.draw = (): void => {
       p5.background(this._darkmodeEnabled ? gray800 : p5.color(255))
+      drawOverlay()
       drawGrid()
       drawDigits()
       drawSelection()
     }
 
+    const setOverlay = (e: Event): void => {
+      const target = e.target as HTMLInputElement
+      const file = (target.files as FileList)[0]
+
+      if (file.type === 'image/png' || file.type === 'image/jpeg') {
+        const urlOfImageFile = URL.createObjectURL(file)
+        overlayImg = p5.loadImage(urlOfImageFile, formatOverlay)
+      }
+    }
+
+    const formatOverlay = (): void => {
+      if (overlayImg !== undefined) {
+        overlayImg.loadPixels()
+
+        for (let y = 0; y < overlayImg.height; y++) {
+          for (let x = 0; x < overlayImg.width; x++) {
+            const index = (y * overlayImg.width + x) * 4
+
+            const r = overlayImg.pixels[index + 0]
+            const g = overlayImg.pixels[index + 1]
+            const b = overlayImg.pixels[index + 2]
+
+            if (r + g + b > 700) {
+              overlayImg.pixels[index + 3] = 0
+            } else {
+              overlayImg.pixels[index + 0] = 156
+              overlayImg.pixels[index + 1] = 163
+              overlayImg.pixels[index + 2] = 175
+            }
+          }
+        }
+
+        overlayImg.updatePixels()
+      }
+      p5.draw()
+    }
+
+    const drawOverlay = (): void => {
+      if (overlayImg !== undefined) {
+        p5.image(overlayImg, 0, 0, p5.width, p5.height)
+      }
+    }
+
     const drawGrid = (): void => {
       p5.stroke(this._darkmodeEnabled ? gray700 : gray200)
       for (let i = 0; i < 10; i++) {
-        p5.strokeWeight(i % 3 === 0 ? 2 : 1)
+        p5.strokeWeight(i % 3 === 0 ? 4 : 2)
         p5.line(i * tileSize + 1, 1, i * tileSize + 1, p5.height + 1)
         p5.line(1, i * tileSize + 1, p5.width + 1, i * tileSize + 1)
       }
@@ -178,7 +344,7 @@ class EditorHandler {
         gray400.setAlpha(255)
       })
 
-      const strokeWeight = 2
+      const strokeWeight = 3
 
       p5.strokeCap(p5.SQUARE)
       p5.strokeWeight(strokeWeight)
@@ -323,6 +489,15 @@ class EditorHandler {
       p5.mouseY >= 0 &&
       p5.mouseY <= p5.height - 4
   }
+}
+interface NamedAssertion {
+  name: string
+  assertion: Assertion
+}
+
+interface NamedError {
+  name: string
+  error: string
 }
 
 export default new EditorHandler()
