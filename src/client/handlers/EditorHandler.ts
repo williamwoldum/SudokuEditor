@@ -31,55 +31,101 @@ class EditorHandler {
   }
 
   private updateInfoBoxes(): void {
-    const desc = document.getElementById('sdk-description')
-    const auth = document.getElementById('sdk-author')
+    const expsElem = document.getElementById('sdk-explanation')
+    const exps = this._sudokuHandler.getExplanations()
 
-    desc!.textContent = 'Title'
-    auth!.textContent = 'Author'
+    // eslint-disable-next-line no-console
+    console.log(exps)
 
-    desc?.classList.remove('hidden')
-    auth?.classList.remove('hidden')
+    for (const constraint of Object.keys(exps)) {
+      const pElem = document.createElement('p')
+      const nameElem = document.createElement('span')
+      const expElem = document.createElement('p')
+
+      nameElem.textContent = `${constraint.slice(1)}: `
+      nameElem.classList.add(
+        'bg-gray-100',
+        'dark:bg-gray-700',
+        'px-1',
+        'font-semibold',
+        'text-xs'
+      )
+
+      pElem.appendChild(nameElem)
+      expElem.textContent = exps[constraint]
+      pElem.appendChild(expElem)
+      expsElem!.appendChild(pElem)
+    }
   }
 
   private updateConstraintBox(namedAssertions: NamedAssertion[]): void {
     const cBox = document.getElementById('constraint-box')
 
-    if (namedAssertions.length > 0) {
-      cBox!.innerHTML = ''
-    } else {
-      cBox!.innerHTML =
-        '<p class="italic text-gray-400 text-xs">No rule breaks</p>'
+    cBox!.innerHTML = ''
+
+    if (namedAssertions.length === 0) {
+      const noRulesElem = document.createElement('p')
+      noRulesElem.classList.add('italic', 'text-gray-400', 'text-xs')
+      noRulesElem.textContent = 'No rule breaks'
+      cBox!.appendChild(noRulesElem)
+      return
     }
+
     namedAssertions.forEach((namedAssertion) => {
-      let formattedMessage =
-        `<span class="bg-gray-200 dark:bg-gray-600 px-1 font-semibold text-xs">${namedAssertion.name.slice(
-          1
-        )}:</span> ` + namedAssertion.assertion.message
-
-      namedAssertion.assertion.cells.forEach((cell) => {
-        // eslint-disable-next-line @typescript-eslint/no-base-to-string
-        formattedMessage += ` <span class="bg-gray-200 dark:bg-gray-600 px-1 font-semibold text-xs">${cell.toString()}</span>`
-      })
-      formattedMessage += '&nbsp;&nbsp;'
-
-      const p = document.createElement('p')
-      p.classList.add(
+      const ruleElem = document.createElement('p')
+      ruleElem.classList.add(
         'text-gray-500',
         'dark:text-gray-400',
         'text-xs',
         'whitespace-nowrap',
-        'hover:cursor-pointer'
+        'space-x-2',
+        'flex'
       )
-      p.innerHTML = formattedMessage
 
-      p.onclick = () => {
+      const badgeElem = document.createElement('span')
+      badgeElem.textContent = `${namedAssertion.name.slice(1)}`
+      badgeElem.classList.add(
+        'bg-gray-200',
+        'dark:bg-gray-600',
+        'px-1',
+        'font-semibold',
+        'hover:cursor-pointer',
+        'text-xs'
+      )
+      badgeElem.onclick = () => {
         this._sudoku.selected = []
         this._sudoku.selected = namedAssertion.assertion.cells.map(
           (cell) => (cell.row - 1) * 9 + (cell.col - 1)
         )
         this._canvas.draw()
       }
-      cBox!.appendChild(p)
+      ruleElem.appendChild(badgeElem)
+
+      const msgElem = document.createElement('p')
+      msgElem.textContent = namedAssertion.assertion.message
+      ruleElem.appendChild(msgElem)
+
+      namedAssertion.assertion.cells.forEach((cell) => {
+        const cellElem = document.createElement('span')
+        // eslint-disable-next-line @typescript-eslint/no-base-to-string
+        cellElem.textContent = cell.toString()
+        cellElem.classList.add(
+          'bg-gray-200',
+          'dark:bg-gray-600',
+          'px-1',
+          'font-semibold',
+          'text-xs',
+          'hover:cursor-pointer',
+          'z-30'
+        )
+        cellElem.onclick = () => {
+          this._sudoku.selected = []
+          this._sudoku.selected = [(cell.row - 1) * 9 + (cell.col - 1)]
+          this._canvas.draw()
+        }
+        ruleElem.appendChild(cellElem)
+      })
+      cBox!.appendChild(ruleElem)
     })
   }
 
@@ -126,7 +172,7 @@ class EditorHandler {
   }
 
   sketch = (p5: P5): void => {
-    const tileSize = 46
+    const tileSize = 40
     const blue300 = p5.color('#93c5fd')
     const blue700 = p5.color('#1d4ed8')
     const red300 = p5.color('#fca5a5')

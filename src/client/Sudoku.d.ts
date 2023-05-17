@@ -1,6 +1,7 @@
 declare class Sudoku {
   constructor()
   checkAllConstraints(values: number[]): Record<string, Assertion[]>
+  getExplanations(): Record<string, string>
 }
 
 declare interface Assertion {
