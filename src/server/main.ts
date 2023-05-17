@@ -8,10 +8,10 @@ import dotenv from 'dotenv'
 dotenv.config()
 
 const app = express()
-const port = parseInt(process.env.PORT ?? '8080')
-const compilerPath =
-  process.env.COMPILER_PATH ?? 'src/server/resources/SdkrCompiler.jar'
-const outputPath = process.env.OUTPUT_PATH ?? 'public/Sudoku'
+const port = 8080
+const jrePath = process.env.JRE_PATH ?? 'java'
+const compilerPath = './src/server/resources/SdkrCompiler.jar'
+const outputPath = './public/Sudoku/'
 
 const storage = multer.diskStorage({
   destination: function (_req, _file, cb) {
@@ -33,7 +33,9 @@ app.post('/upload-sudoku', upload.single('file'), (req, res) => {
 
   try {
     const id = randomBytes(3).toString('hex')
-    execSync(`${compilerPath} -i ${file.path} -o ${outputPath}/${id}.js"`)
+    execSync(
+      `${jrePath} -jar ${compilerPath} -i ${file.path} -o ${outputPath}/${id}.js"`
+    )
     return res.status(200).send(id)
   } catch (error) {
     if (error instanceof Error) {

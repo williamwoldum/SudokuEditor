@@ -55,10 +55,46 @@ class EditorHandler {
     }
   }
 
-  private updateConstraintBox(namedAssertions: NamedAssertion[]): void {
+  private updateConstraintBox(
+    namedAssertions: NamedAssertion[],
+    namedErrors: NamedError[]
+  ): void {
     const cBox = document.getElementById('constraint-box')
 
     cBox!.innerHTML = ''
+
+    if (namedErrors.length > 0) {
+      namedErrors.forEach((nemedError) => {
+        const errorElem = document.createElement('p')
+        errorElem.classList.add(
+          'text-gray-500',
+          'dark:text-gray-400',
+          'text-xs',
+          'whitespace-nowrap',
+          'space-x-2',
+          'flex'
+        )
+
+        const badgeElem = document.createElement('span')
+        badgeElem.textContent = `${nemedError.name.slice(1)}`
+        badgeElem.classList.add(
+          'bg-gray-200',
+          'dark:bg-gray-600',
+          'px-1',
+          'font-semibold',
+          'hover:cursor-pointer',
+          'text-xs',
+          'text-red-500'
+        )
+        errorElem.appendChild(badgeElem)
+
+        const msgElem = document.createElement('p')
+        msgElem.textContent = nemedError.error
+        errorElem.appendChild(msgElem)
+        cBox!.appendChild(errorElem)
+      })
+      return
+    }
 
     if (namedAssertions.length === 0) {
       const noRulesElem = document.createElement('p')
@@ -138,10 +174,11 @@ class EditorHandler {
       cell.isBroken = false
     })
 
-    const assertions = this._sudokuHandler.checkAllConstraints(
+    const constraintResults = this._sudokuHandler.checkAllConstraints(
       this._sudoku.getNums()
     )
-    const failedAssertions = this.formatAssertions(assertions)
+    const failedAssertions = this.formatAssertions(constraintResults)
+    const failedErrors = this.formatErrors(constraintResults)
 
     for (const namedAssertion of failedAssertions) {
       for (const cell of namedAssertion.assertion.cells) {
@@ -150,15 +187,15 @@ class EditorHandler {
       }
     }
 
-    this.updateConstraintBox(failedAssertions)
+    this.updateConstraintBox(failedAssertions, failedErrors)
   }
 
   private formatAssertions(
-    constraintsAssertions: Record<string, Assertion[]>
+    constraintsAssertions: constraintsResult
   ): NamedAssertion[] {
     const formattedConstraints: NamedAssertion[] = []
     for (const name of Object.keys(constraintsAssertions)) {
-      for (const assertion of constraintsAssertions[name]) {
+      for (const assertion of constraintsAssertions[name].results) {
         // eslint-disable-next-line @typescript-eslint/no-unnecessary-boolean-literal-compare
         if (assertion.passed === false) {
           formattedConstraints.push({ name, assertion })
@@ -166,6 +203,16 @@ class EditorHandler {
       }
     }
     return formattedConstraints
+  }
+
+  private formatErrors(constraintsAssertions: constraintsResult): NamedError[] {
+    const formattedErrors: NamedError[] = []
+    for (const name of Object.keys(constraintsAssertions)) {
+      for (const error of constraintsAssertions[name].errors) {
+        formattedErrors.push({ name, error })
+      }
+    }
+    return formattedErrors
   }
 
   sketch = (p5: P5): void => {
@@ -446,6 +493,11 @@ class EditorHandler {
 interface NamedAssertion {
   name: string
   assertion: Assertion
+}
+
+interface NamedError {
+  name: string
+  error: string
 }
 
 export default new EditorHandler()

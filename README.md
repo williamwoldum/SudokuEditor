@@ -4,8 +4,8 @@ A dev platform to easily test .sdkr files
 
 ## Includes
 
-- Frontend server build with [vitejs](https://vitejs.dev/) running vanilla js. Responsible for providing a sudoku editor and UI for uploading `.sdk` and `.sdkr` files.
-- Backend [express](https://expressjs.com/) server to handle `.sdkr` rule compilation.
+- Frontend server build with [vitejs](https://vitejs.dev/) running vanilla js. Responsible for providing a sudoku editor and UI for uploading `.sudocode`
+- Backend [express](https://expressjs.com/) server to handle `.sudocode` to `.js` rule compilation.
 
 ## Configs
 
@@ -21,4 +21,5 @@ A dev platform to easily test .sdkr files
 
 ## Development
 
+Update the `.env`
 To launch dev server run `npm run dev`

@@ -173,10 +173,18 @@ class Sudoku {
 
         for (const key of tlConstraintKeys) {
             const constraint = this[key]
-            output[key] = []
+            output[key] = {
+                results: [],
+                errors: []
+            }
             for (const input of constraint.inputs()) {
-                for (const x of constraint.pred(...input)) {
-                    output[key].push(x)
+                try {
+                    const assertions = constraint.pred(...input)
+                    for (const assertion of assertions) {
+                        output[key].results.push(assertion)
+                    }
+                } catch (e) {
+                    output[key].errors.push(e.toString())
                 }
             }
         }
