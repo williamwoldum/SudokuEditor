@@ -1,5 +1,9 @@
 import './style.css'
-import { handleSdkrUpload, handleUploadClick } from './handlers/UploadHandler'
+import {
+  handleSudocodeUpload,
+  handleSudocodeUploadClick,
+  handleOverlayUploadClick
+} from './handlers/UploadHandler'
 import EditorHandler from './handlers/EditorHandler'
 
 const darkModeToggle = document.getElementById(
@@ -12,11 +16,14 @@ document.getElementById('reset-btn')!.addEventListener('click', () => {
   EditorHandler.resetSudoku()
 })
 document
-  .getElementById('upload-btn')!
-  .addEventListener('click', handleUploadClick)
+  .getElementById('upload-sudocode-btn')!
+  .addEventListener('click', handleSudocodeUploadClick)
 document
-  .getElementById('upload-input')!
-  .addEventListener('change', handleSdkrUpload)
+  .getElementById('upload-sudocode-input')!
+  .addEventListener('change', handleSudocodeUpload)
+document
+  .getElementById('upload-overlay-btn')!
+  .addEventListener('click', handleOverlayUploadClick)
 
 updateDarkMode()
 

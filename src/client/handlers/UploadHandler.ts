@@ -1,12 +1,14 @@
 import { reportError, reportSuccess } from './StatusHandler'
-// import EditorHandler from './EditorHandler'
-// import { SudokuHandler } from '../models/SudokuHandler'
 
-export function handleUploadClick(): void {
-  document.getElementById('upload-input')?.click()
+export function handleSudocodeUploadClick(): void {
+  document.getElementById('upload-sudocode-input')?.click()
 }
 
-export function handleSdkrUpload(e: Event): void {
+export function handleOverlayUploadClick(): void {
+  document.getElementById('upload-overlay-input')?.click()
+}
+
+export function handleSudocodeUpload(e: Event): void {
   const target = e.target as HTMLInputElement
   const file = (target.files as FileList)[0]
 

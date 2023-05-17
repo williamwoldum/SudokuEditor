@@ -34,9 +34,6 @@ class EditorHandler {
     const expsElem = document.getElementById('sdk-explanation')
     const exps = this._sudokuHandler.getExplanations()
 
-    // eslint-disable-next-line no-console
-    console.log(exps)
-
     for (const constraint of Object.keys(exps)) {
       const pElem = document.createElement('p')
       const nameElem = document.createElement('span')
@@ -184,25 +181,74 @@ class EditorHandler {
     const gray700 = p5.color('#374151')
     const gray800 = p5.color('#1f2937')
 
+    let overlayImg: P5.Image
+
     p5.setup = () => {
       const canvas = p5.createCanvas(tileSize * 9 + 2, tileSize * 9 + 2)
       canvas.parent('canvasContainer')
       p5.cursor('pointer')
       p5.textAlign(p5.CENTER, p5.CENTER)
       p5.noLoop()
+
+      const input = document.getElementById('upload-overlay-input')
+      input!.addEventListener('change', setOverlay, false)
     }
 
     p5.draw = (): void => {
       p5.background(this._darkmodeEnabled ? gray800 : p5.color(255))
+      drawOverlay()
       drawGrid()
       drawDigits()
       drawSelection()
     }
 
+    const setOverlay = (e: Event): void => {
+      const target = e.target as HTMLInputElement
+      const file = (target.files as FileList)[0]
+
+      if (file.type === 'image/png' || file.type === 'image/jpeg') {
+        const urlOfImageFile = URL.createObjectURL(file)
+        overlayImg = p5.loadImage(urlOfImageFile, formatOverlay)
+      }
+    }
+
+    const formatOverlay = (): void => {
+      if (overlayImg !== undefined) {
+        overlayImg.loadPixels()
+
+        for (let y = 0; y < overlayImg.height; y++) {
+          for (let x = 0; x < overlayImg.width; x++) {
+            const index = (y * overlayImg.width + x) * 4
+
+            const r = overlayImg.pixels[index + 0]
+            const g = overlayImg.pixels[index + 1]
+            const b = overlayImg.pixels[index + 2]
+
+            if (r + g + b > 700) {
+              overlayImg.pixels[index + 3] = 0
+            } else {
+              overlayImg.pixels[index + 0] = 156
+              overlayImg.pixels[index + 1] = 163
+              overlayImg.pixels[index + 2] = 175
+            }
+          }
+        }
+
+        overlayImg.updatePixels()
+      }
+      p5.draw()
+    }
+
+    const drawOverlay = (): void => {
+      if (overlayImg !== undefined) {
+        p5.image(overlayImg, 0, 0, p5.width, p5.height)
+      }
+    }
+
     const drawGrid = (): void => {
       p5.stroke(this._darkmodeEnabled ? gray700 : gray200)
       for (let i = 0; i < 10; i++) {
-        p5.strokeWeight(i % 3 === 0 ? 2 : 1)
+        p5.strokeWeight(i % 3 === 0 ? 4 : 2)
         p5.line(i * tileSize + 1, 1, i * tileSize + 1, p5.height + 1)
         p5.line(1, i * tileSize + 1, p5.width + 1, i * tileSize + 1)
       }
@@ -251,7 +297,7 @@ class EditorHandler {
         gray400.setAlpha(255)
       })
 
-      const strokeWeight = 2
+      const strokeWeight = 3
 
       p5.strokeCap(p5.SQUARE)
       p5.strokeWeight(strokeWeight)
