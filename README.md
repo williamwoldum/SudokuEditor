@@ -1,6 +1,6 @@
 # Sudoku Editor
 
-A dev platform to easily test .sdkr files
+A dev platform to easily test .sudocode files
 
 ## Includes
 
@@ -21,5 +21,5 @@ A dev platform to easily test .sdkr files
 
 ## Development
 
-Update the `.env`
-To launch dev server run `npm run dev`
+- Update the `.env`
+- To launch dev server run `npm run dev`
