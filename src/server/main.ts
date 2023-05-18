@@ -34,7 +34,7 @@ app.post('/upload-sudoku', upload.single('file'), (req, res) => {
   try {
     const id = randomBytes(3).toString('hex')
     execSync(
-      `${jrePath} -jar ${compilerPath} -i ${file.path} -o ${outputPath}/${id}.js"`
+      `${jrePath} -jar ${compilerPath} -i ${file.path} -o ${outputPath}/${id}.js`
     )
     return res.status(200).send(id)
   } catch (error) {
